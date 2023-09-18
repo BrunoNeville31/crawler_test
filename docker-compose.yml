@@ -1,0 +1,30 @@
+version: '3'
+
+volumes:
+  postgres_data:  
+  redis_data:
+
+services:
+  crawler:
+    container_name: "crawler"
+    build: .
+    ports:
+      - 8001:8000
+    command: uvicorn main:app --host 0.0.0.0
+    labels:
+      - traefik.http.routers.crawler.rule=Host(`crawler.sunartecnologia.com.br`)
+      - traefik.http.routers.crawler.entrypoints=websecure,web
+      - traefik.http.services.crawler.loadbalancer.server.port=8000
+      - traefik.http.routers.crawler.tls.certresolver=myresolver
+
+    tty: true
+    x-develop:
+      watch:       
+        - action: rebuild
+          path: .
+  
+
+networks: 
+  default: 
+    external: 
+      name: security
